@@ -1,24 +1,33 @@
 from collections import namedtuple
 from sortedcontainers import SortedDict
+from typing import List
 
-PriceUpdate = namedtuple("price_update", ['type', 'action', 'price', 'quantity', 'order_count', 'level'])
+PriceUpdate = namedtuple("PriceUpdate",
+                         ['time', 'type', 'action', 'price', 'quantity', 'order_count', 'level'])
+
+Quote = namedtuple('Quote', ['time', 'bid_price', 'bid_quantity', 'ask_price', 'ask_quantity'])
 
 
 class Book:
     def __init__(self, depth):
         self.depth = depth
         self.orders = SortedDict()
+        self.empty_price = PriceUpdate("", None, None, None, None, None, None)
 
-    def update(self, price_update: PriceUpdate):
+    def update(self, price_update: PriceUpdate) -> bool:
         action = {
-            '0': self.new_order,
-            '1': self.update_order,
-            '2': self.delete_order,
-            '3': self.delete_thru,
-            '4': self.delete_from
-        }[price_update.action]
+            48: self.new_order,
+            49: self.update_order,
+            50: self.delete_order,
+            51: self.delete_thru,
+            52: self.delete_from
+        }.get(price_update.action, None)
 
-        action(price_update)
+        if action:
+            action(price_update)
+            return True
+
+        return False
 
     def update_order(self, price_update: PriceUpdate):
         self.orders[price_update.price] = price_update
@@ -32,49 +41,65 @@ class Book:
 
 class BidTable(Book):
     def new_order(self, price_update: PriceUpdate):
-        self.orders[price_update.price] = price_update
-
-        if len(self.orders) > self.depth:
+        if len(self.orders) == self.depth:
             self.orders.popitem(last=True)
 
-    def get_book(self):
+        self.orders[price_update.price] = price_update
+
+    def get_book(self) -> List[PriceUpdate]:
         return reversed(self.orders.values())
 
     def delete_from(self, price_update: PriceUpdate):
         direction = price_update.level - 1
         del self.orders.iloc[:-direction]
 
-    def top(self):
-        return self.orders.peekitem(-1)
+    def top(self) -> PriceUpdate:
+        return self.orders.peekitem(-1)[1] if self.orders else self.empty_price
 
 
 class AskTable(Book):
     def new_order(self, price_update: PriceUpdate):
-        self.orders[price_update.price] = price_update
-        if len(self.orders) > self.depth:
+        if len(self.orders) == self.depth:
             self.orders.popitem()
 
-    def get_book(self):
+        self.orders[price_update.price] = price_update
+
+    def get_book(self) -> List[PriceUpdate]:
         return self.orders.values()
 
     def delete_from(self, price_update: PriceUpdate):
         direction = price_update.level
         del self.orders.iloc[:direction]
 
-    def top(self):
-        return self.orders.peekitem(0)
+    def top(self) -> PriceUpdate:
+        return self.orders.peekitem(0)[1] if self.orders else self.empty_price
 
 
 class PyBook:
     def __init__(self, depth):
+        self.latest_time = ""
         self.bids = BidTable(depth)
         self.asks = AskTable(depth)
         self.depth = depth
 
-    def update(self, price_update: PriceUpdate):
+    def update(self, price_update: PriceUpdate) -> bool:
         book = {
-            '0': self.bids,
-            '1': self.asks
-        }[price_update.type]
+            48: self.bids,
+            49: self.asks
+        }.get(price_update.type, None)
 
-        book.update(price_update)
+        if book and book.update(price_update):
+            self.latest_time = price_update.time
+            return True
+
+    def top_of_book(self) -> Quote:
+        top_bid = self.bids.top()
+        top_ask = self.asks.top()
+
+        return Quote(
+            time=self.latest_time,
+            bid_price=top_bid.price,
+            bid_quantity=top_bid.quantity,
+            ask_price=top_ask.price,
+            ask_quantity=top_ask.quantity
+        )

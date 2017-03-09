@@ -14,7 +14,7 @@ def get_price_update():
 
 
 def main():
-    num_prices = 10000000
+    num_prices = 1000000
     prices = [get_price_update() for _ in range(num_prices)]
 
     book = PyBook(10)
