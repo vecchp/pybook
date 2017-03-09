@@ -26,8 +26,7 @@ def test_delete_thru(ticks, book_type, result):
     for price_update in ticks:
         bid_book.update(price_update)
 
-    for expected_price, book_price in zip(result, bid_book.get_book()):
-        assert (expected_price == book_price)
+    assert result == list(bid_book.get_book())
 
 
 @pytest.mark.parametrize("ticks,book_type,result", [
@@ -61,8 +60,7 @@ def test_delete_from(ticks, book_type, result):
     for price_update in ticks:
         bid_book.update(price_update)
 
-    for expected, actual in zip(result, bid_book.get_book()):
-        assert expected == actual
+    assert result == list(bid_book.get_book())
 
 
 @pytest.mark.parametrize("ticks,book_type,result", [
@@ -100,6 +98,5 @@ def test_delete(ticks, book_type, result):
     for price_update in ticks:
         bid_book.update(price_update)
 
-    for expected, actual in zip(result, bid_book.get_book()):
-        assert expected == actual
+    assert result == list(bid_book.get_book())
 

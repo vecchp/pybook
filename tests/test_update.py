@@ -26,6 +26,4 @@ def test_update(ticks, book_type, result):
     for price_update in ticks:
         bid_book.update(price_update)
 
-    for expected, actual in zip(result, bid_book.get_book()):
-        assert expected == actual
-
+    assert result == list(bid_book.get_book())
