@@ -49,9 +49,9 @@ def test_delete_thru(ticks, book_type, result):
          PriceUpdate(time=None, type=48, action=48, price=9430.00, quantity=400, order_count=1, level=5),
          PriceUpdate(time=None, type=48, action=52, price=None, quantity=None, order_count=None, level=3),
      ], BidTable, [
-         PriceUpdate(time=None, type=48, action=48, price=9430.00, quantity=400, order_count=1, level=5),
-         PriceUpdate(time=None, type=48, action=48, price=9429.50, quantity=300, order_count=14, level=4)
-     ])
+         PriceUpdate(time=None, type=48, action=48, price=9428.50, quantity=750, order_count=34, level=2),
+         PriceUpdate(time=None, type=48, action=48, price=9428.00, quantity=503, order_count=20, level=1),
+    ])
 
 ])
 def test_delete_from(ticks, book_type, result):

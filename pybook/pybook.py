@@ -9,10 +9,11 @@ Quote = namedtuple('Quote', ['time', 'bid_price', 'bid_quantity', 'ask_price', '
 
 
 class Book:
-    def __init__(self, depth):
+    def __init__(self, depth, multlipler=1):
         self.depth = depth
         self.orders = SortedDict()
         self.empty_price = PriceUpdate("", None, None, None, None, None, None)
+        self.multiplier = multlipler
 
     def update(self, price_update: PriceUpdate) -> bool:
         action = {
@@ -30,39 +31,19 @@ class Book:
         return False
 
     def update_order(self, price_update: PriceUpdate):
-        self.orders[price_update.price] = price_update
+        self.orders[self.multiplier * price_update.price] = price_update
 
     def delete_order(self, price_update: PriceUpdate):
-        self.orders.pop(price_update.price)
+        self.orders.pop(self.multiplier * price_update.price)
 
     def delete_thru(self, price_update: PriceUpdate):
         self.orders.clear()
 
-
-class BidTable(Book):
-    def new_order(self, price_update: PriceUpdate):
-        if len(self.orders) == self.depth:
-            self.orders.popitem(last=True)
-
-        self.orders[price_update.price] = price_update
-
-    def get_book(self) -> List[PriceUpdate]:
-        return reversed(self.orders.values())
-
-    def delete_from(self, price_update: PriceUpdate):
-        direction = price_update.level - 1
-        del self.orders.iloc[:-direction]
-
-    def top(self) -> PriceUpdate:
-        return self.orders.peekitem(-1)[1] if self.orders else self.empty_price
-
-
-class AskTable(Book):
     def new_order(self, price_update: PriceUpdate):
         if len(self.orders) == self.depth:
             self.orders.popitem()
 
-        self.orders[price_update.price] = price_update
+        self.orders[self.multiplier * price_update.price] = price_update
 
     def get_book(self) -> List[PriceUpdate]:
         return self.orders.values()
@@ -73,6 +54,16 @@ class AskTable(Book):
 
     def top(self) -> PriceUpdate:
         return self.orders.peekitem(0)[1] if self.orders else self.empty_price
+
+
+class BidTable(Book):
+    def __init__(self, depth):
+        super().__init__(depth, -1)
+
+
+class AskTable(Book):
+    def __init__(self, depth):
+        super().__init__(depth)
 
 
 class PyBook:
