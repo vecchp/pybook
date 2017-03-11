@@ -9,11 +9,11 @@ Quote = namedtuple('Quote', ['time', 'bid_price', 'bid_quantity', 'ask_price', '
 
 
 class Book:
-    def __init__(self, depth, multlipler=1):
+    def __init__(self, depth, multiplier=1):
         self.depth = depth
         self.orders = SortedDict()
         self.empty_price = PriceUpdate("", None, None, None, None, None, None)
-        self.multiplier = multlipler
+        self.multiplier = multiplier
 
     def update(self, price_update: PriceUpdate) -> bool:
         action = {
