@@ -1,4 +1,5 @@
-from pybook import PyBook, PriceUpdate
+#from pybook import PyBook, PriceUpdate
+from pybook.heapbook import PyBook, PriceUpdate, cme_price_maker
 import random
 import time
 
@@ -10,7 +11,7 @@ def get_price_update():
     quantity = random.randint(1, 700)
     order_count = random.randint(1, 20)
     level = random.randint(1, 10)
-    return PriceUpdate(None, price_type, action, price, quantity, order_count, level)
+    return cme_price_maker(None, price_type, action, price, quantity, order_count, level)
 
 
 def main():
@@ -21,7 +22,6 @@ def main():
 
     start = time.time()
     for price in prices:
-        #print(price)
         book.update(price)
         #print(book.top_of_book())
     end = time.time()
