@@ -1,7 +1,7 @@
 import pytest
 #from pybook import PriceUpdate
 #from pybook import BidTable, AskTable
-from pybook.heapbook import PriceUpdate, Book, BidUpdate
+from pybook.heapbook import Book, BidUpdate
 
 
 @pytest.mark.parametrize("ticks,result", [

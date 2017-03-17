@@ -1,5 +1,5 @@
-#from pybook import PyBook, PriceUpdate
-from pybook.heapbook import PyBook, PriceUpdate, cme_price_maker
+from pybook import PyBook, HeapBook, SortedDictBook
+from pybook.price import cme_price_maker
 import random
 import time
 
@@ -15,10 +15,10 @@ def get_price_update():
 
 
 def main():
-    num_prices = 5000000
+    num_prices = 1000000
     prices = [get_price_update() for _ in range(num_prices)]
 
-    book = PyBook(10)
+    book = PyBook(10, HeapBook)
 
     start = time.time()
     for price in prices:
